@@ -54,11 +54,32 @@ async fn main() -> Result<()> {
         ("9", 9), ("nine", 9)
     ]);
 
+    // let re_numbers_spelled_out = RegexSet::new([
+    //     r"\d",
+    //     r"one",
+    //     r"two",
+    //     r"three",
+    //     r"four",
+    //     r"five",
+    //     r
+    // ]).unwrap();
+
     let re_numbers_spelled_out = Regex::new(r"\d|one|two|three|four|five|six|seven|eight|nine").unwrap();
+    let re_numbers_spelled_out_r = Regex::new(r"\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin").unwrap();
 
     let sum_phase2 = lines.iter().fold(0, |memo, next| {
-        let str_numbers: Vec<&str> = re_numbers_spelled_out.find_iter(next).map(|n| n.as_str()).collect();
-        format!("{}{}", number_map.get(str_numbers.first().unwrap().trim()).unwrap(), number_map.get(str_numbers.last().unwrap().trim()).unwrap()).parse::<i32>().unwrap() + memo
+        let str_numbers_forward: Vec<&str> = re_numbers_spelled_out.find_iter(next).map(|n| n.as_str()).collect();
+
+        let next_reversed: String = next.chars().rev().collect();
+        let str_numbers_reverse: Vec<&str> = re_numbers_spelled_out_r.find_iter(next_reversed.as_str()).map(|n| n.as_str()).collect();
+
+        let first = str_numbers_forward.first().unwrap();
+        let last = str_numbers_reverse.first().unwrap();
+        println!("first: {}, last: {}", first, last);
+
+        let combined = format!("{}{}", number_map.get(first).unwrap(), number_map.get(last).unwrap()).parse::<i32>().unwrap();
+        println!("{} -- {}", combined, next);
+        combined + memo
     });
 
     println!("phase 2 result: {}", sum_phase2);
