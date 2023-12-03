@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use clap::{Parser};
+use clap::Parser;
 use std::{
     fs::File,
     io::{prelude::*, BufReader},
@@ -7,7 +7,7 @@ use std::{
 };
 use std::collections::HashMap;
 use std::ops::Deref;
-use regex::Regex;
+use regex::{Regex, RegexSet, Match, Matches};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -54,30 +54,45 @@ async fn main() -> Result<()> {
         ("9", 9), ("nine", 9)
     ]);
 
-    // let re_numbers_spelled_out = RegexSet::new([
-    //     r"\d",
-    //     r"one",
-    //     r"two",
-    //     r"three",
-    //     r"four",
-    //     r"five",
-    //     r
-    // ]).unwrap();
+    let re_numbers_spelled_out = RegexSet::new([
+        r"\d",
+        r"one",
+        r"two",
+        r"three",
+        r"four",
+        r"five",
+        r"six",
+        r"seven",
+        r"eight",
+        r"nine",
+    ]).unwrap();
 
-    let re_numbers_spelled_out = Regex::new(r"\d|one|two|three|four|five|six|seven|eight|nine").unwrap();
-    let re_numbers_spelled_out_r = Regex::new(r"\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin").unwrap();
+    let patterns = vec![
+        Regex::new(r"\d").unwrap(),
+        Regex::new(r"one").unwrap(),
+        Regex::new(r"two").unwrap(),
+        Regex::new(r"three").unwrap(),
+        Regex::new(r"four").unwrap(),
+        Regex::new(r"five").unwrap(),
+        Regex::new(r"six").unwrap(),
+        Regex::new(r"seven").unwrap(),
+        Regex::new(r"eight").unwrap(),
+        Regex::new(r"nine").unwrap(),
+    ];
 
     let sum_phase2 = lines.iter().fold(0, |memo, next| {
-        let str_numbers_forward: Vec<&str> = re_numbers_spelled_out.find_iter(next).map(|n| n.as_str()).collect();
+        // for each regular expression get matches
+        let matches: Vec<Match> = patterns.iter()
+            .map(|p| p.find_iter(next).collect::<Vec<Match>>())
+            .flatten()
+            .collect();
 
-        let next_reversed: String = next.chars().rev().collect();
-        let str_numbers_reverse: Vec<&str> = re_numbers_spelled_out_r.find_iter(next_reversed.as_str()).map(|n| n.as_str()).collect();
+        let first_match = matches.iter().reduce(|memo, next| if next.start() < memo.start() { next } else { memo }).unwrap().as_str();
+        let last_match = matches.iter().reduce(|memo, next| if next.start() > memo.start() { next } else { memo }).unwrap().as_str();
 
-        let first = str_numbers_forward.first().unwrap();
-        let last = str_numbers_reverse.first().unwrap();
-        println!("first: {}, last: {}", first, last);
+        println!("first: {}, last: {}", first_match, last_match);
 
-        let combined = format!("{}{}", number_map.get(first).unwrap(), number_map.get(last).unwrap()).parse::<i32>().unwrap();
+        let combined = format!("{}{}", number_map.get(first_match).unwrap(), number_map.get(last_match).unwrap()).parse::<i32>().unwrap();
         println!("{} -- {}", combined, next);
         combined + memo
     });
