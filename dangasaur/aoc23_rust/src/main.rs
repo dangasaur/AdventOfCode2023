@@ -7,7 +7,7 @@ use std::{
 };
 use std::collections::HashMap;
 use std::ops::Deref;
-use regex::{Regex, RegexSet, Match, Matches};
+use regex::{Regex, Match};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -53,19 +53,6 @@ async fn main() -> Result<()> {
         ("8", 8), ("eight", 8),
         ("9", 9), ("nine", 9)
     ]);
-
-    let re_numbers_spelled_out = RegexSet::new([
-        r"\d",
-        r"one",
-        r"two",
-        r"three",
-        r"four",
-        r"five",
-        r"six",
-        r"seven",
-        r"eight",
-        r"nine",
-    ]).unwrap();
 
     let patterns = vec![
         Regex::new(r"\d").unwrap(),
