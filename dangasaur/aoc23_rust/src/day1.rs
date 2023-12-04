@@ -1,18 +1,19 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::collections::HashMap;
 use regex::{Regex, Match};
 
-use crate::aoc::Solution;
+use crate::aoc::{Solution, Solveable};
 
-pub async fn solve(lines: Vec<String>) -> Result<Solution> {
+#[derive(Debug, Default, PartialEq)]
+pub struct Day1 {}
+impl Solveable for Day1 {
+    fn solve (&self, lines: &Vec<String>) -> Result<Solution> {
     let re_numbers = Regex::new(r"\d").unwrap();
 
-    let sum_phase1 = lines.iter().fold(0, |memo, next| {
+    let sum_part1 = lines.iter().fold(0, |memo, next| {
         let str_numbers: Vec<&str> = re_numbers.find_iter(next).map(|n| n.as_str()).collect();
         format!("{}{}", str_numbers.first().unwrap(), str_numbers.last().unwrap()).parse::<i32>().unwrap() + memo
     });
-
-    println!("phase 1 result: {}", sum_phase1);
 
     // phase 2
     let number_map = HashMap::from([
@@ -41,7 +42,7 @@ pub async fn solve(lines: Vec<String>) -> Result<Solution> {
         Regex::new(r"nine").unwrap(),
     ];
 
-    let sum_phase2 = lines.iter().fold(0, |memo, next| {
+    let sum_part2 = lines.iter().fold(0, |memo, next| {
         // for each regular expression get matches
         let matches: Vec<Match> = patterns.iter()
             .map(|p| p.find_iter(next).collect::<Vec<Match>>())
@@ -50,19 +51,16 @@ pub async fn solve(lines: Vec<String>) -> Result<Solution> {
 
         let first_match = matches.iter().reduce(|memo, next| if next.start() < memo.start() { next } else { memo }).unwrap().as_str();
         let last_match = matches.iter().reduce(|memo, next| if next.start() > memo.start() { next } else { memo }).unwrap().as_str();
-
-        println!("first: {}, last: {}", first_match, last_match);
-
         let combined = format!("{}{}", number_map.get(first_match).unwrap(), number_map.get(last_match).unwrap()).parse::<i32>().unwrap();
-        println!("{} -- {}", combined, next);
         combined + memo
     });
 
-    println!("phase 2 result: {}", sum_phase2);
-
     let solution = Solution {
+       part_1: sum_part1.to_string(),
+       part_2: sum_part2.to_string(), 
+    };
 
+    Ok(solution)
     }
-
-    Ok()
 }
+
