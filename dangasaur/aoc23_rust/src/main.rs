@@ -30,7 +30,7 @@ pub enum Day {
     D4(Day4),
 
     #[strum(serialize = "day5", serialize = "5")]
-    D4(Day5),
+    D5(Day5),
 }
 
 impl Solveable for Day {
